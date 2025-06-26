@@ -1,8 +1,9 @@
 import jwt from "jsonwebtoken";
+import User from "../models/User.model.js";
 
 const verifyUser = async (req, res, next) => {
   try {
-    const token = res.headers.authorization.split(" "[1]);
+    const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
       return res
         .status(404)
@@ -12,13 +13,15 @@ const verifyUser = async (req, res, next) => {
     if (!decoded) {
       return res.status(404).json({ success: false, error: "Token Not Valid" });
     }
-    const user = await user.findById({ _id: decoded._id }).select("-password");
+
+    const user = await User.findById({ _id: decoded._id }).select("-password");
     if (!user) {
       return res.status(404).json({ success: false, error: "User Not Found" });
     }
     req.user = user;
     next();
   } catch (error) {
+    console.log("ërror:", error);
     return res.status(404).json({ success: false, error: "Server Error" });
   }
 };
