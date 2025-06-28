@@ -21,7 +21,7 @@ const verifyUser = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    console.log("ërror:", error);
+    console.log("error:", error);
     return res.status(404).json({ success: false, error: "Server Error" });
   }
 };
