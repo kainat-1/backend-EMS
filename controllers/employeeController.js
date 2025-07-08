@@ -20,12 +20,15 @@ const upload = multer({ storage });
 // Add employee
 const addEmployee = async (req, res) => {
   try {
-    const { name, email, employeeId, dob, department, salary, password, role } = req.body;
+    const { name, email, employeeId, dob, department, salary, password, role } =
+      req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ success: false, error: "User already exists" });
+      return res
+        .status(400)
+        .json({ success: false, error: "User already exists" });
     }
 
     // Hash password
@@ -53,10 +56,14 @@ const addEmployee = async (req, res) => {
 
     await newEmployee.save();
 
-    return res.status(200).json({ success: true, message: "Employee created successfully" });
+    return res
+      .status(200)
+      .json({ success: true, message: "Employee created successfully" });
   } catch (error) {
     console.error("Add employee error:", error);
-    return res.status(500).json({ success: false, error: "Server error in adding employee" });
+    return res
+      .status(500)
+      .json({ success: false, error: "Server error in adding employee" });
   }
 };
 
@@ -69,7 +76,9 @@ const getEmployees = async (req, res) => {
 
     return res.status(200).json({ success: true, employees });
   } catch (error) {
-    return res.status(500).json({ success: false, error: "get employees server error" });
+    return res
+      .status(500)
+      .json({ success: false, error: "get employees server error" });
   }
 };
 
@@ -78,17 +87,28 @@ const getEmployee = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const employee = await Employee.findById(id)
+    let employee = await Employee.findById(id)
       .populate("userId", { password: 0 })
       .populate("department");
 
     if (!employee) {
-      return res.status(404).json({ success: false, error: "Employee not found" });
+      employee = await Employee.findOne({ userId: id })
+        .populate("userId", { password: 0 })
+        .populate("department");
+    }
+
+    if (!employee) {
+      return res
+        .status(404)
+        .json({ success: false, error: "Employee not found" });
     }
 
     return res.status(200).json({ success: true, employee });
   } catch (error) {
-    return res.status(500).json({ success: false, error: "get employee server error" });
+    console.error("Get employee error:", error);
+    return res
+      .status(500)
+      .json({ success: false, error: "get employee server error" });
   }
 };
 
@@ -100,7 +120,9 @@ const updateEmployee = async (req, res) => {
 
     const employee = await Employee.findById(id);
     if (!employee) {
-      return res.status(404).json({ success: false, error: "Employee Not Found" });
+      return res
+        .status(404)
+        .json({ success: false, error: "Employee Not Found" });
     }
 
     const user = await User.findById(employee.userId);
@@ -117,10 +139,14 @@ const updateEmployee = async (req, res) => {
     await User.findByIdAndUpdate(user._id, userUpdateData);
     await Employee.findByIdAndUpdate(id, { department, salary });
 
-    return res.status(200).json({ success: true, message: "Employee updated successfully" });
+    return res
+      .status(200)
+      .json({ success: true, message: "Employee updated successfully" });
   } catch (error) {
     console.error("Update employee error:", error);
-    return res.status(500).json({ success: false, error: "Update failed, employee server error" });
+    return res
+      .status(500)
+      .json({ success: false, error: "Update failed, employee server error" });
   }
 };
 
@@ -129,17 +155,31 @@ const fetchEmployeesByDepId = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const employees = await Employee.find({ department: id }).populate("userId").populate("department");
+    const employees = await Employee.find({ department: id })
+      .populate("userId")
+      .populate("department");
 
     if (!employees || employees.length === 0) {
-      return res.status(404).json({ success: false, error: "No employees found in this department" });
+      return res.status(404).json({
+        success: false,
+        error: "No employees found in this department",
+      });
     }
 
     return res.status(200).json({ success: true, employees });
   } catch (error) {
     console.error("Fetch employees by department error:", error);
-    return res.status(500).json({ success: false, error: "get employee server error" });
+    return res
+      .status(500)
+      .json({ success: false, error: "get employee server error" });
   }
 };
 
-export { addEmployee, upload, getEmployees, getEmployee, updateEmployee, fetchEmployeesByDepId };
+export {
+  addEmployee,
+  upload,
+  getEmployees,
+  getEmployee,
+  updateEmployee,
+  fetchEmployeesByDepId,
+};

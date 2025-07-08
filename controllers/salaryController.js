@@ -43,4 +43,19 @@ const addSalary = async (req, res) => {
   }
 };
 
-export { addSalary };
+const getSalary = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const salaries = await Salary.find({ employeeId: id }).populate(
+      "employeeId"
+    );
+
+    return res.status(200).json({ success: true, salary: salaries });
+  } catch (error) {
+    console.error("Get salary error:", error.stack || error);
+    res.status(500).json({ success: false, error: "Salary server error" });
+  }
+};
+
+export { addSalary, getSalary };
