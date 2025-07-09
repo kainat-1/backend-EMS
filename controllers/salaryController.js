@@ -1,4 +1,5 @@
 import Salary from "../models/Salary.js";
+import Employee from "../models/Employee.js";
 
 const addSalary = async (req, res) => {
   try {
@@ -23,7 +24,7 @@ const addSalary = async (req, res) => {
     const netSalary = parsedBasicSalary + parsedAllowances - parsedDeduction;
 
     const newSalary = new Salary({
-      employeeId: employeeId,
+      employeeId,
       basicSalary: parsedBasicSalary,
       allowances: parsedAllowances,
       deduction: parsedDeduction,
@@ -47,9 +48,16 @@ const getSalary = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const salaries = await Salary.find({ employeeId: id }).populate(
-      "employeeId"
-    );
+    let salaries = await Salary.find({ employeeId: id }).populate("employeeId");
+
+    if (!salaries || salaries.length === 0) {
+      const employee = await Employee.findOne({ userId: id });
+      if (!employee) {
+        return res.status(404).json({ success: false, error: "Employee not found" });
+      }
+
+      salaries = await Salary.find({ employeeId: employee._id }).populate("employeeId");
+    }
 
     return res.status(200).json({ success: true, salary: salaries });
   } catch (error) {

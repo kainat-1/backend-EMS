@@ -9,6 +9,8 @@ import employeeRouter from "./routes/employees.js";
 import authRouter from "./routes/auth.js";
 import salaryRouter from "./routes/salary.js";
 import leaveRouter from "./routes/leave.js";
+import settingRouter from "./routes/setting.js";
+
 import connectToDatabase from "./DataBase/DB.js";
 
 const app = express();
@@ -24,7 +26,8 @@ app.use("/api/auth", authRouter);
 app.use("/api/department", departmentRouter);
 app.use("/api/employee", employeeRouter);
 app.use("/api/salary", salaryRouter);
-app.use("/api/leave", leaveRouter); 
+app.use("/api/leave", leaveRouter);
+app.use("/api/setting", settingRouter);
 
 // Connect to MongoDB
 connectToDatabase();
