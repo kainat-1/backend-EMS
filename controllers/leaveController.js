@@ -43,12 +43,12 @@ const AddLeave = async (req, res) => {
   }
 };
 
-// GET: Fetch all leaves by userId (from Employee model)
+// GET: Fetch all leaves by userId (via Employee model)
 const getLeavesByUser = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    // Find the employee using userId
+    // Find the employee by userId
     const employee = await Employee.findOne({ userId });
     if (!employee) {
       return res.status(404).json({
@@ -57,6 +57,7 @@ const getLeavesByUser = async (req, res) => {
       });
     }
 
+    // Find leaves for that employee
     const leaves = await Leave.find({ employeeId: employee._id });
 
     return res.status(200).json({ success: true, leaves });
@@ -72,14 +73,13 @@ const getLeavesByUser = async (req, res) => {
 // GET: Fetch all leaves with employee and department info
 const getLeave = async (req, res) => {
   try {
-    const leaves = await Leave.find()
-      .populate({
-        path: "employeeId",
-        populate: [
-          { path: "userId", select: "name" },
-          { path: "department", select: "dep_name" }
-        ]
-      });
+    const leaves = await Leave.find().populate({
+      path: "employeeId",
+      populate: [
+        { path: "userId", select: "name" },
+        { path: "department", select: "dep_name" },
+      ],
+    });
 
     if (!leaves || leaves.length === 0) {
       return res.status(404).json({
@@ -98,4 +98,54 @@ const getLeave = async (req, res) => {
   }
 };
 
-export { AddLeave, getLeavesByUser, getLeave };
+// GET: Fetch single leave details by ID
+const getLeavesDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const leave = await Leave.findById(id).populate({
+      path: "employeeId",
+      populate: [
+        { path: "userId", select: "name" },
+        { path: "department", select: "dep_name" },
+      ],
+    });
+
+    if (!leave) {
+      return res.status(404).json({
+        success: false,
+        error: "Leave not found",
+      });
+    }
+
+    res.status(200).json({ success: true, leave });
+  } catch (error) {
+    console.error("Get leave detail error:", error.stack || error);
+    res.status(500).json({
+      success: false,
+      error: "Failed to fetch leave details",
+    });
+  }
+};
+
+const UpdateLeave = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  try {
+    const leave = await Leave.findByIdAndUpdate(id, { status }, { new: true });
+
+    if (!leave) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Leave not found" });
+    }
+
+    res.status(200).json({ success: true, leave });
+  } catch (err) {
+    console.error("UpdateLeave Error:", err.message);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+export { AddLeave, getLeavesByUser, getLeave, getLeavesDetails, UpdateLeave };
