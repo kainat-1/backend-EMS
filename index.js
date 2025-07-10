@@ -26,7 +26,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/department", departmentRouter);
 app.use("/api/employee", employeeRouter);
 app.use("/api/salary", salaryRouter);
-app.use("/api/leave", leaveRouter);
+app.use("/api/leaves", leaveRouter);
 app.use("/api/setting", settingRouter);
 
 // Connect to MongoDB
